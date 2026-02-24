@@ -56,18 +56,18 @@ usermod -aG docker ubuntu
 
 # 4. ECR Authentication (Wait 10s for IAM role to settle)
 sleep 10
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 756859458126.dkr.ecr.us-east-1.amazonaws.com
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin "${var.account_id}.dkr.ecr.us-east-1.amazonaws.com"
 
 # 5. Create Docker Compose file
 cat <<EOT > /home/ubuntu/docker-compose.yml
 services:
   service1:
-    image: 756859458126.dkr.ecr.us-east-1.amazonaws.com/service1:latest
+    image: "${var.account_id}.dkr.ecr.us-east-1.amazonaws.com/service1:latest"
     ports:
       - "5000:5000"
     restart: always
   service2:
-    image: 756859458126.dkr.ecr.us-east-1.amazonaws.com/service2:latest
+    image: "${var.account_id}.dkr.ecr.us-east-1.amazonaws.com/service2:latest"
     ports:
       - "5001:5001"
     restart: always
