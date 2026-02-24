@@ -39,6 +39,71 @@ The architecture follows AWS best practices for high availability and security:
 
 ---
 
+
+* Below is the architecture diagram
+
+```mermaid
+graph TB
+    subgraph VPC [AWS VPC - main]
+        direction TB
+        
+        IGW((Internet Gateway))
+        
+        subgraph Public_Subnets [Public Subnets - AZ1 & AZ2]
+            ALB[Application Load Balancer]
+            NAT[NAT Gateway]
+            EIP[Elastic IP]
+            NAT --- EIP
+        end
+
+        subgraph Private_Subnets [Private Subnets - AZ1 & AZ2]
+            direction TB
+            subgraph ASG [Auto Scaling Group]
+                direction LR
+                subgraph Instance_1 [EC2 Instance A]
+                    S1_A[Service 1: 5000]
+                    S2_A[Service 2: 5001]
+                end
+                subgraph Instance_2 [EC2 Instance B]
+                    S1_B[Service 1: 5000]
+                    S2_B[Service 2: 5001]
+                end
+            end
+        end
+
+        subgraph ECR_Registry [Amazon ECR]
+            IMG1[(Service 1 Image)]
+            IMG2[(Service 2 Image)]
+        end
+
+        %% Traffic Flow Logic
+        User((User)) -->|HTTP /service1| ALB
+        User -->|HTTP /service2| ALB
+        
+        ALB -->|Rewrite /service1 -> :5000| S1_A
+        ALB -->|Rewrite /service1 -> :5000| S1_B
+        
+        ALB -->|Rewrite /service2 -> :5001| S2_A
+        ALB -->|Rewrite /service2 -> :5001| S2_B
+
+        %% Outbound Logic
+        ASG -.->|Docker Pull| NAT
+        NAT -.->|via IGW| ECR_Registry
+    end
+
+    %% Official AWS Color Palette
+    style VPC fill:#ffffff,stroke:#232f3e,stroke-width:2px
+    style ALB fill:#FF9900,color:#fff,stroke:#232f3e,stroke-width:2px
+    style ASG fill:#E1F5FE,stroke:#01579B,stroke-dasharray: 5 5
+    style Instance_1 fill:#01579B,color:#fff
+    style Instance_2 fill:#01579B,color:#fff
+    style NAT fill:#34A853,color:#fff,stroke:#232f3e
+    style ECR_Registry fill:#232F3E,color:#fff,stroke:#FF9900
+    style S1_A fill:#fff,color:#333
+    style S1_B fill:#fff,color:#333
+    style S2_A fill:#fff,color:#333
+    style S2_B fill:#fff,color:#333
+```
 ## 🚦 Getting Started
 
 ### Prerequisites
@@ -86,3 +151,4 @@ The project includes a robust validation suite (`validate_endpoints.py`) that en
 * **No SSH Keys:** Access to instances is handled via AWS SSM.
 * **State Management:** Recommended to use a remote S3 backend with DynamoDB locking for production.
 * **Secrets:** No sensitive data is hardcoded; all configuration is handled via Terraform variables.
+
