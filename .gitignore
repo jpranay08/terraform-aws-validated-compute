@@ -1,0 +1,29 @@
+# 1. Terraform Local Data (
+.terraform/
+
+# 2. Terraform State Files 
+*.tfstate
+*.tfstate.*
+
+# 3. Variable files 
+*.tfvars
+*.tfvars.json
+
+# 4. Crash logs and plan files
+crash.log
+*.tfplan
+
+# 5. Local AWS/User configs
+.terraformrc
+terraform.rc
+
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+
+# 7. OS-specific files 
+Thumbs.db
+desktop.ini
+.DS_Store
